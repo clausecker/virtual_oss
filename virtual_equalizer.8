@@ -25,9 +25,9 @@
 .\" SUCH DAMAGE.
 .\"
 .\"
-.Dd March 13, 2019
+.Dd February 12, 2025
 .Dt VIRTUAL_EQUALIZER 8
-.Os FreeBSD
+.Os
 .Sh NAME
 .Nm virtual_equalizer
 .Nd audio equalizer
@@ -119,12 +119,9 @@ cat << EOF | virtual_equalizer -d /dev/vdsp.ctl -w tx_dev -p 0 -c 2
 EOF
 
 .Ed
-.Pp
-.Sh FILES
 .Sh SEE ALSO
 .Xr virtual_oss 8
 .Sh AUTHORS
 .Nm
 was written by
 .An Richard Kralovic riso@google.com .
-.Pp
