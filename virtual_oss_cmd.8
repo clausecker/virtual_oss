@@ -23,11 +23,14 @@
 .\" SUCH DAMAGE.
 .\"
 .\"
-.Dd February 28, 2022
+.Dd February 12, 2025
 .Dt VIRTUAL_OSS_CMD 8
-.Os FreeBSD
+.Os
 .Sh NAME
 .Nm virtual_oss_cmd
+.Nd modify a running
+.Xr virtual_oss 8
+instance's options
 .Sh SYNOPSIS
 .Nm
 .Sh DESCRIPTION
@@ -57,6 +60,7 @@ Supported command line arguments:
 .It Fl s Ar xxx
 .It Fl w Ar xxx
 .El
+.Pp
 Refer to
 .Xr virtual_oss 8
 for a detailed description of the command line arguments.
@@ -91,11 +95,9 @@ To show system information:
 virtual_oss_cmd /dev/vdsp.ctl
 
 .Ed
-.Sh FILES
 .Sh SEE ALSO
 .Xr virtual_oss 8
 .Sh AUTHORS
 .Nm
 was written by
 .An Hans Petter Selasky hselasky@freebsd.org .
-.Pp
