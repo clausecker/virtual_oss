@@ -1639,7 +1639,6 @@ uint32_t voss_dsp_tx_refresh;
 char voss_dsp_rx_device[VMAX_STRING];
 char voss_dsp_tx_device[VMAX_STRING];
 char voss_ctl_device[VMAX_STRING];
-char voss_sta_device[VMAX_STRING];
 
 uint32_t voss_jitter_up;
 uint32_t voss_jitter_down;
@@ -1694,7 +1693,6 @@ usage(void)
 	    "\t" "-C 2 -c 2 -r 48000 -b 16 -s 100.0ms -f /dev/dsp3 \\\n"
 	    "\t" "-P /dev/dsp3 -R /dev/dsp1 \\\n"
 	    "\t" "-O /dev/dsp3 -R /dev/null \\\n"
-	    "\t" "-T /dev/sndstat \\\n"
 	    "\t" "-c 1 -m 0,0 [-w wav.0] -d dsp100.0 \\\n"
 	    "\t" "-c 1 -m 0,0 [-w wav.0] -d vdsp.0 \\\n"
 	    "\t" "-c 2 -m 0,0,1,1 [-w wav.1] -d vdsp.1 \\\n"
@@ -1908,14 +1906,12 @@ dup_profile(vprofile_t *pvp, int *pamp, int pol, int rx_mute,
 			return ("Could not create CUSE DSP device");
 		}
 
-		/* register sndstat, if any */
-		if (voss_sta_device[0] != 0) {
-			ptr->fd_sta = open(voss_sta_device, O_WRONLY);
-			if (ptr->fd_sta < 0) {
-				warn("Could not open '%s'", voss_sta_device);
-			} else {
-				init_sndstat(ptr);
-			}
+		/* register to sndstat */
+		ptr->fd_sta = open("/dev/sndstat", O_WRONLY);
+		if (ptr->fd_sta < 0) {
+			warn("Could not open /dev/sndstat");
+		} else {
+			init_sndstat(ptr);
 		}
 	}
 	/* create WAV device */
@@ -2017,7 +2013,7 @@ parse_options(int narg, char **pparg, int is_main)
 	float samples_ms;
 
 	if (is_main)
-		optstr = "N:J:k:H:o:F:G:w:e:p:a:C:c:r:b:f:g:x:i:m:M:d:l:L:s:t:h?O:P:Q:R:ST:BD:E:";
+		optstr = "N:J:k:H:o:F:G:w:e:p:a:C:c:r:b:f:g:x:i:m:M:d:l:L:s:t:h?O:P:Q:R:SBD:E:";
 	else
 		optstr = "F:G:w:e:p:a:c:b:f:m:M:d:l:L:s:O:P:R:E:";
 
@@ -2285,12 +2281,6 @@ parse_options(int narg, char **pparg, int is_main)
 			}
 			if (voss_dsp_samples >= (1U << 24))
 				return ("-s option requires a non-zero positive value");
-			break;
-		case 'T':
-			if (voss_sta_device[0])
-				return ("-T parameter may only be used once");
-
-			strncpy(voss_sta_device, optarg, sizeof(voss_sta_device));
 			break;
 		case 't':
 			if (voss_ctl_device[0])

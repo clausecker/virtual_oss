@@ -225,7 +225,6 @@ extern int voss_has_synchronization;
 extern char voss_dsp_rx_device[VMAX_STRING];
 extern char voss_dsp_tx_device[VMAX_STRING];
 extern char voss_ctl_device[VMAX_STRING];
-extern char voss_sta_device[VMAX_STRING];
 
 extern void atomic_lock(void);
 extern void atomic_unlock(void);
