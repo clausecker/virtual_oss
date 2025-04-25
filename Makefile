@@ -26,7 +26,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 
-.PATH: . backend_oss backend_bt backend_null backend_sndio command equalizer frontend_http
+.PATH: . backend_oss backend_bt backend_null backend_sndio
 
 PROG=		virtual_oss
 MAN=		${PROG}.8
