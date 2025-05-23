@@ -271,6 +271,8 @@ virtual_oss_process(void *arg)
 		rx_be->close(rx_be);
 		tx_be->close(tx_be);
 
+		if (voss_exit)
+			break;
 		if (need_delay)
 			sleep(2);
 
@@ -337,6 +339,8 @@ virtual_oss_process(void *arg)
 			uint64_t delta_time;
 
 			/* Check if DSP device should be re-opened */
+			if (voss_exit)
+				break;
 			if (voss_dsp_rx_refresh || voss_dsp_tx_refresh) {
 				need_delay = false;
 				break;
@@ -897,5 +901,13 @@ virtual_oss_process(void *arg)
 			}
 		}
 	}
+
+	free(buffer_dsp);
+	free(buffer_temp);
+	free(buffer_monitor);
+	free(buffer_local);
+	free(buffer_data);
+	free(buffer_orig);
+
 	return (NULL);
 }

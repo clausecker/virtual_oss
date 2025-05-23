@@ -1629,6 +1629,7 @@ uint8_t	voss_libsamplerate_enable;
 uint8_t	voss_libsamplerate_quality = SRC_SINC_FASTEST;
 int	voss_is_recording = 1;
 int	voss_has_synchronization;
+volatile sig_atomic_t voss_exit = 0;
 
 static int voss_dsp_perm = 0666;
 static int voss_do_background;
@@ -1994,6 +1995,12 @@ virtual_cuse_init_profile(struct virtual_profile *pvp)
 
 	init_compressor(pvp);
 	init_mapping(pvp);
+}
+
+static void
+virtual_sig_exit(int sig)
+{
+	voss_exit = 1;
 }
 
 static const char *
@@ -2558,6 +2565,7 @@ main(int argc, char **argv)
 	}
 
 	const char *ptrerr;
+	struct sigaction sa;
 
 	TAILQ_INIT(&virtual_profile_client_head);
 	TAILQ_INIT(&virtual_profile_loopback_head);
@@ -2578,6 +2586,14 @@ main(int argc, char **argv)
 		errx(EX_USAGE, "Could not connect to cuse module");
 
 	signal(SIGPIPE, &virtual_pipe);
+
+	memset(&sa, 0, sizeof(sa));
+	sigfillset(&sa.sa_mask);
+	sa.sa_handler = virtual_sig_exit;
+	if (sigaction(SIGINT, &sa, NULL) < 0)
+		err(1, "sigaction(SIGINT)");
+	if (sigaction(SIGTERM, &sa, NULL) < 0)
+		err(1, "sigaction(SIGTERM)");
 
 	ptrerr = parse_options(argc, argv, 1);
 	if (ptrerr != NULL)
