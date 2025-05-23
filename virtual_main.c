@@ -58,8 +58,10 @@ static pthread_cond_t atomic_cv;
 static void
 atomic_init(void)
 {
-	pthread_mutex_init(&atomic_mtx, NULL);
-	pthread_cond_init(&atomic_cv, NULL);
+	if (pthread_mutex_init(&atomic_mtx, NULL) != 0)
+		err(1, "pthread_mutex_init");
+	if (pthread_cond_init(&atomic_cv, NULL) != 0)
+		err(1, "pthread_cond_init");
 }
 
 void
@@ -1648,6 +1650,8 @@ struct voss_backend *voss_rx_backend;
 struct voss_backend *voss_tx_backend;
 
 static int voss_dups;
+static int voss_ntds;
+static pthread_t *voss_tds;
 
 static void
 voss_rx_backend_refresh(void)
@@ -2488,15 +2492,29 @@ create_threads(void)
 	int idx;
 
 	/* Give each DSP device 4 threads */
+	voss_ntds = voss_dups * 4;
+	voss_tds = malloc(voss_ntds * sizeof(pthread_t));
+	if (voss_tds == NULL)
+		err(1, "malloc");
 
-	for (idx = 0; idx != (voss_dups * 4); idx++) {
-		pthread_t td;
-
-		pthread_create(&td, NULL, &virtual_cuse_process, NULL);
+	for (idx = 0; idx < voss_ntds; idx++) {
+		if (pthread_create(&voss_tds[idx], NULL, &virtual_cuse_process,
+		    NULL) != 0)
+			err(1, "pthread_create");
 	}
 
 	/* Reset until next time called */
 	voss_dups = 0;
+}
+
+static void
+destroy_threads(void)
+{
+	int idx;
+
+	for (idx = 0; idx < voss_ntds; idx++)
+		pthread_cancel(voss_tds[idx]);
+	free(voss_tds);
 }
 
 void
@@ -2651,6 +2669,8 @@ main(int argc, char **argv)
 	/* Run DSP threads */
 
 	virtual_oss_process(NULL);
+
+	destroy_threads();
 
 	if (voss_ctl_device[0] != 0)
 		cuse_dev_destroy(pdev);
