@@ -2566,6 +2566,7 @@ main(int argc, char **argv)
 
 	const char *ptrerr;
 	struct sigaction sa;
+	struct cuse_dev *pdev;
 
 	TAILQ_INIT(&virtual_profile_client_head);
 	TAILQ_INIT(&virtual_profile_loopback_head);
@@ -2636,8 +2637,6 @@ main(int argc, char **argv)
 	/* Create CTL device */
 
 	if (voss_ctl_device[0] != 0) {
-		struct cuse_dev *pdev;
-
 		pdev = cuse_dev_create(&vctl_methods, NULL, NULL,
 		    0, 0, voss_dsp_perm, voss_ctl_device);
 		if (pdev == NULL)
@@ -2652,6 +2651,9 @@ main(int argc, char **argv)
 	/* Run DSP threads */
 
 	virtual_oss_process(NULL);
+
+	if (voss_ctl_device[0] != 0)
+		cuse_dev_destroy(pdev);
 
 	return (0);
 }
